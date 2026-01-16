@@ -6,14 +6,15 @@ import { Link } from 'expo-router';
 import React, { useState } from 'react';
 import { ScrollView, StatusBar, StyleSheet, Text, View } from 'react-native';
 import { TextInput } from 'react-native-paper';
-/* import Icon from 'react-native-vector-icons/FontAwesome'; */
 
 export default function Index() {
   const Router =  require('expo-router').useRouter();
 
   const [formData, setformData] = useState({
       email:'',
-      password:''
+      password:'',
+      name:'',
+      value_hour:''
   })
   const [loading, setLoading] = React.useState(false);
 
@@ -21,20 +22,20 @@ export default function Index() {
 
     setLoading(true);
 
-    if(!formData.email || !formData.password){
+    if(!formData.email || !formData.password || !formData.name || !formData.value_hour){
       alert('Por favor, preencha todos os campos.');
       setLoading(false);
       return;
     }
 
     try{
-      const result = await api.post('/auth', formData)
+      const result = await api.post('/users', formData)
 
       console.log(result.data);
-      alert('Login realizado com sucesso!');
+      alert('Usuário criado com sucesso!');
       // adicionar o token recuperado em algum lugar seguro (context, storage, etc)
       // criar a tela home e redirecionar para ela
-      Router.replace('/(pages)/home');
+      Router.replace('/(pages)/login');
     }
     catch(error: any){
       alert(`Erro ao fazer login. Por favor, tente novamente. ERROR: ${error.message}` );
@@ -85,12 +86,35 @@ export default function Index() {
                         />
                     </View>
 
-                    <View style={{width:'95%',marginBottom:10}} >
-                        <Text style={{fontSize:17,fontFamily:'OpenSans-SemiBold',
-                    color:'#818181',alignSelf:'flex-end',paddingTop:10}} >Forgot Password?</Text>
+                    <View  style={{
+                      justifyContent:'center',
+                      backgroundColor:'#ededed',
+                      width:'95%',
+                      borderRadius:10,
+                      height:60,
+                      marginTop:20
+                    }} >
+                        <TextInput
+                          label="Name"
+                          onChangeText={ text => setformData({...formData, name:text})}
+                        />
                     </View>
 
-                    <Buttons text="Entrar" onPress={handleLogin}/>
+                    <View  style={{
+                      justifyContent:'center',
+                      backgroundColor:'#ededed',
+                      width:'95%',
+                      borderRadius:10,
+                      height:60,
+                      marginTop:20
+                    }} >
+                        <TextInput
+                          label="Valor por hora trabalhada"
+                          onChangeText={ text => setformData({...formData, value_hour:text})}
+                        />
+                    </View>
+
+                    <Buttons text="REGISTRAR" onPress={handleLogin}/>
 
                     <View style={{width:'95%',marginBottom:10}} >
                         <Link
@@ -101,7 +125,7 @@ export default function Index() {
                             alignSelf:'flex-end',
                             paddingTop:10
                           }}
-                          href={{ pathname: "/(pages)/register" }}>Ainda não tem uma conta? Cadastro</Link>  
+                          href={{ pathname: "/(pages)/register" }}>Já tem uma conta? Entrar</Link>  
                     </View>
                 </View>
             </View>
