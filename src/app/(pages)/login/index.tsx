@@ -1,14 +1,17 @@
 
 import Colors from '@/app/constants/colors';
 import Buttons from '@/components/button';
-import { api } from '@/infra/api/api';
-import { Link } from 'expo-router';
+import { AuthRepository } from '@/infra/repositories/auth.respository';
+import { Link, Redirect } from 'expo-router';
 import React, { useState } from 'react';
 import { ScrollView, StatusBar, StyleSheet, Text, View } from 'react-native';
 import { TextInput } from 'react-native-paper';
+import { useAuth } from '../../../context/auth-context.context';
 /* import Icon from 'react-native-vector-icons/FontAwesome'; */
 
 export default function Index() {
+  const repository = new AuthRepository()
+  const { session, signin} = useAuth()
   const Router =  require('expo-router').useRouter();
 
   const [formData, setformData] = useState({
@@ -19,16 +22,14 @@ export default function Index() {
 
   async function handleLogin() {
 
-    setLoading(true);
-
     if(!formData.email || !formData.password){
       alert('Por favor, preencha todos os campos.');
-      setLoading(false);
       return;
     }
 
     try{
-      const result = await api.post('/auth', formData)
+      const result = await repository.signin(formData)
+      signin(formData)
 
       console.log(result.data);
       alert('Login realizado com sucesso!');
@@ -45,6 +46,7 @@ export default function Index() {
     console.log(formData);
   }
 
+  if (session) return <Redirect href="/" />;
   return (
         <ScrollView style={{flex:1,backgroundColor:'#F9F7F7',flexDirection:'column'}}>
             <StatusBar barStyle="dark-content" backgroundColor="#F9F7F7" />
