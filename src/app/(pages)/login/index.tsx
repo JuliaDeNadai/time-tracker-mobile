@@ -1,50 +1,39 @@
 
 import Colors from '@/app/constants/colors';
 import Buttons from '@/components/button';
-import { api } from '@/infra/api/api';
 import { Link } from 'expo-router';
 import React, { useState } from 'react';
 import { ScrollView, StatusBar, StyleSheet, Text, View } from 'react-native';
 import { TextInput } from 'react-native-paper';
-/* import Icon from 'react-native-vector-icons/FontAwesome'; */
+import { useAuth } from '../../../context/auth-context.context';
 
 export default function Index() {
-  const Router =  require('expo-router').useRouter();
+  const { token, signin} = useAuth()
 
   const [formData, setformData] = useState({
       email:'',
       password:''
   })
-  const [loading, setLoading] = React.useState(false);
 
   async function handleLogin() {
 
-    setLoading(true);
-
     if(!formData.email || !formData.password){
       alert('Por favor, preencha todos os campos.');
-      setLoading(false);
       return;
     }
 
     try{
-      const result = await api.post('/auth', formData)
+      await signin(formData)
 
-      console.log(result.data);
       alert('Login realizado com sucesso!');
-      // adicionar o token recuperado em algum lugar seguro (context, storage, etc)
-      // criar a tela home e redirecionar para ela
-      Router.replace('/(pages)/home');
     }
     catch(error: any){
       alert(`Erro ao fazer login. Por favor, tente novamente. ERROR: ${error.message}` );
     }
-    finally{
-      setLoading(false);
-    }
     console.log(formData);
   }
 
+  console.log("Login Page token:", token);
   return (
         <ScrollView style={{flex:1,backgroundColor:'#F9F7F7',flexDirection:'column'}}>
             <StatusBar barStyle="dark-content" backgroundColor="#F9F7F7" />
