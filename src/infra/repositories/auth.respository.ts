@@ -5,8 +5,13 @@ interface LoginParameters {
     password: string
 }
 
+interface LoginResponse {
+    access_token: string
+}
+
 export class AuthRepository {
-    public async signin({email, password}: LoginParameters){
-        return await api.post('/auth', {email, password})
+    public async signin({email, password}: LoginParameters): Promise<string> {
+        const { data } = await api.post<LoginResponse>('/auth', {email, password})
+        return data.access_token
     }
 }

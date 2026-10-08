@@ -1,0 +1,51 @@
+export interface User {
+  _id: string;
+  name: string;
+  email: string;
+  value_hour: number;
+}
+
+export interface CreateUserParameters {
+  name: string;
+  email: string;
+  password: string;
+  value_hour: string;
+}
+
+export interface NamedResource {
+  _id: string;
+  name: string;
+}
+
+export type Service = NamedResource;
+export type Company = NamedResource;
+
+type Ref<T> = string | T;
+
+export interface TimeEntry {
+  _id: string;
+  user: Ref<Pick<User, '_id' | 'name' | 'email' | 'value_hour'>>;
+  company: Ref<NamedResource>;
+  service: Ref<NamedResource>;
+  /** "dd/MM/yyyy, HH:mm:ss" no fuso America/Sao_Paulo */
+  clock_in: string;
+  clock_out: string | null;
+  /** "HH:MM" */
+  total_hours: string | null;
+  /** número serializado como string */
+  total_amount: string | null;
+  details: string | null;
+  active: boolean;
+}
+
+export interface TimeEntryFilters {
+  year: number;
+  month: number;
+  companyId?: string;
+}
+
+export interface StartTimeEntryParameters {
+  service: string;
+  company: string;
+  details?: string;
+}

@@ -1,0 +1,34 @@
+---
+description: Como implementar designs do Figma (via Figma MCP) neste app Expo + React Native. Usar sempre que o usuário enviar um link do Figma ou pedir para implementar uma tela/componente a partir do design.
+globs: src/**/*.tsx
+alwaysApply: false
+---
+
+# Figma → React Native (Expo)
+
+O Figma MCP retorna código de referência em React + Tailwind (web). Trate esse código **apenas como especificação visual**; nunca copie HTML, `className` ou classes Tailwind para o projeto.
+
+## Fluxo
+
+1. Chame `get_design_context` para o nó do link enviado e `get_screenshot` para ter a referência visual.
+2. Se o design usar variables/styles, chame `get_variable_defs` e reaproveite/estenda os tokens em `src/constants/colors.ts` em vez de hardcodear valores.
+3. Implemente um frame/componente por vez e compare o resultado com o screenshot.
+
+## Stack e mapeamento
+
+- Elementos: `div` → `View`, texto → `Text`, `img` → `Image` do `expo-image`, botões → `TouchableOpacity`/`Pressable` ou componentes do `react-native-paper`.
+- Inputs: usar `TextInput` do `react-native-paper` (padrão já usado em `login` e `register`).
+- Ícones: `@expo/vector-icons` (escolher o ícone mais próximo do design); não exportar SVGs do Figma a menos que seja logo/ilustração.
+- Estilos: `StyleSheet.create` no final do arquivo. Converter flex/auto-layout do Figma para flexbox do RN (lembre que o padrão no RN é `flexDirection: 'column'`).
+- Unidades: valores em px do Figma viram números sem unidade. Sem `rem`, `vh`, `box-shadow` CSS (use `shadow*`/`elevation`) ou `gap` em porcentagem.
+- Fontes: o design usa Signika (títulos/botões) e Alegreya Sans (inputs/textos auxiliares), carregadas via `@expo-google-fonts` no `_layout.tsx`. Use as constantes de `@/constants/fonts`; se precisar de um peso novo, adicione-o em `FontAssets` e em `Fonts`.
+- Componentes já criados a partir do design (em `src/components/`): `AuthScreen`, `UnderlineInput`, `Buttons`, `ActionCard` (card verde com recorte), `TabBar`, `WeeklyChart`, `RecordCard`, `journey.tsx` (`JourneyLayout`, `Stepper`, `JourneyButton`), `OptionPicker` e `ResourceListScreen`.
+
+## Estrutura do projeto
+
+- Rotas com expo-router em `src/app/`. Telas públicas em `src/app/(auth)/`; telas logadas em `src/app/(app)/` (abas em `(app)/(tabs)/`). Não coloque arquivos que não sejam rotas dentro de `src/app/`.
+- Acesso à API via repositórios em `src/infra/repositories/` (tipos em `src/infra/models.ts`); nunca chame `api` direto nas telas. Datas do backend vêm como `"dd/MM/yyyy, HH:mm:ss"` — use os helpers de `src/utils/time.ts`.
+- Componentes reutilizáveis em `src/components/` (ex.: `Buttons` em `src/components/button.tsx`); reutilize-os antes de criar novos.
+- Cores em `src/constants/colors.ts`, importadas via `@/constants/colors`.
+- Use o alias `@/` (aponta para `src/`) nos imports.
+- Textos de interface em português.

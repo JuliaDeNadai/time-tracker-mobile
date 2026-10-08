@@ -1,8 +1,12 @@
+import { setUnauthorizedHandler } from '@/infra/api/api';
+import { JourneyNotification } from '@/infra/notifications/journey-notification';
 import { AuthRepository } from '@/infra/repositories/auth.respository';
+import { ActiveEntryStorage } from '@/infra/storage/active-entry';
 import { TokenStorage } from '@/infra/storage/token';
 import React, {
   createContext,
   ReactNode,
+  useCallback,
   useContext,
   useEffect,
   useState,
@@ -17,11 +21,18 @@ interface AuthContextData {
 
 const AuthContext = createContext<AuthContextData | undefined>(undefined);
 
+const repository = new AuthRepository();
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
-  const repository = new AuthRepository();
+  const signout = useCallback(async () => {
+    await TokenStorage.removeToken();
+    await ActiveEntryStorage.remove();
+    await JourneyNotification.dismiss();
+    setToken(null);
+  }, []);
 
   useEffect(() => {
     const restoreToken = async () => {
@@ -32,17 +43,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     restoreToken();
   }, []);
 
-  const signin = async ({ email, password }: { email: string; password: string }) => {
-    setLoading(true);
-    const result: any = await repository.signin({ email, password });
-    await TokenStorage.saveToken(result.token);
-    setToken(result.token);
-    setLoading(false);
-  };
+  useEffect(() => {
+    setUnauthorizedHandler(() => { signout(); });
+    return () => setUnauthorizedHandler(null);
+  }, [signout]);
 
-  const signout = async () => {
-    await TokenStorage.removeToken();
-    setToken(null);
+  const signin = async ({ email, password }: { email: string; password: string }) => {
+    const accessToken = await repository.signin({ email, password });
+    await TokenStorage.saveToken(accessToken);
+    setToken(accessToken);
   };
 
   return (
