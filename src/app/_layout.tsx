@@ -1,36 +1,43 @@
-import { Redirect, Slot, useSegments } from 'expo-router';
+import { AlertHost } from '@/components/app-alert';
+import Colors from '@/constants/colors';
+import { FontAssets } from '@/constants/fonts';
+import { useFonts } from 'expo-font';
+import { Slot } from 'expo-router';
 import { ActivityIndicator, View } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AuthProvider, useAuth } from '../context/auth-context.context';
 
-function AuthGate() {
-  const { token, loading } = useAuth();
-  const segments = useSegments();
+function Loading() {
+  return (
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: Colors.background }}>
+      <ActivityIndicator size="large" color={Colors.primary} />
+    </View>
+  );
+}
 
-  const isPublicRoute = segments[0] === '(pages)';
+function AuthGate() {
+  const { loading } = useAuth();
 
   if (loading) {
-    return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" />
-      </View>
-    );
-  }
-
-  if (!token && !isPublicRoute) {
-    return <Redirect href="/(pages)/login" />;
-  }
-
-  if (token && !isPublicRoute) {
-    return <Redirect href="/(pages)/home" />;
+    return <Loading />;
   }
 
   return <Slot />;
 }
 
 export default function RootLayout() {
+  const [fontsLoaded] = useFonts(FontAssets);
+
+  if (!fontsLoaded) {
+    return <Loading />;
+  }
+
   return (
-    <AuthProvider>
-      <AuthGate />
-    </AuthProvider>
+    <SafeAreaProvider>
+      <AuthProvider>
+        <AuthGate />
+      </AuthProvider>
+      <AlertHost />
+    </SafeAreaProvider>
   );
 }

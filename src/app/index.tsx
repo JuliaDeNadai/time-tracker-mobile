@@ -1,17 +1,8 @@
-import { Link } from "expo-router";
-import { Text, View } from "react-native";
+import { Redirect } from "expo-router";
+import { useAuth } from "../context/auth-context.context";
 
 export default function Index() {
-  return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-    >
-      <Text>HOME.</Text>
-      <Link href={{ pathname: "/(pages)/login" }}>Go to Login Page</Link>
-    </View>
-  );
+  const { token } = useAuth();
+
+  return <Redirect href={token ? "/home" : "/login"} />;
 }

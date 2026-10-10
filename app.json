@@ -1,24 +1,28 @@
 {
   "expo": {
-    "name": "time-tracker-mobile",
+    "name": "Ponto",
     "slug": "time-tracker-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "timetrackermobile",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.juliadenadai.timetracker",
+      "appleTeamId": "823CK4JP5D",
+      "infoPlist": {
+        "NSSupportsLiveActivities": true
+      }
     },
     "android": {
+      "package": "com.juliadenadai.timetracker",
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
+        "backgroundColor": "#FFFFFF",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
-      "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false
     },
     "web": {
@@ -26,6 +30,7 @@
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
+      "./plugins/without-local-push-entitlement",
       "expo-router",
       [
         "expo-splash-screen",
@@ -38,11 +43,38 @@
             "backgroundColor": "#000000"
           }
         }
-      ]
+      ],
+      "expo-font",
+      "expo-image",
+      "expo-notifications",
+      "expo-secure-store",
+      "expo-sharing",
+      "expo-status-bar",
+      "expo-web-browser",
+      "@bacons/apple-targets",
+      "./plugins/with-scene-lifecycle"
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "build": {
+          "experimental": {
+            "ios": {
+              "appExtensions": [
+                {
+                  "bundleIdentifier": "com.juliadenadai.timetracker.widget",
+                  "targetName": "JourneyWidget"
+                }
+              ]
+            }
+          }
+        },
+        "projectId": "4add31db-2564-44f7-839d-f2e960a49fb6"
+      }
     }
   }
 }

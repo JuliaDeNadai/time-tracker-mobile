@@ -1,0 +1,9 @@
+{
+  "platforms": ["apple", "android"],
+  "apple": {
+    "modules": ["JourneyActivityModule"]
+  },
+  "android": {
+    "modules": ["expo.modules.journeyactivity.JourneyActivityModule"]
+  }
+}
