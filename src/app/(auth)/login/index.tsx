@@ -43,16 +43,16 @@ export default function Index() {
       <View style={styles.form}>
         <UnderlineInput
           placeholder="Email"
-          value={formData.email}
-          onChangeText={text => setformData({...formData, email:text})}
+          defaultValue={formData.email}
+          onChangeText={text => setformData(current => ({...current, email:text}))}
           keyboardType="email-address"
           autoCapitalize="none"
           autoComplete="email"
         />
         <UnderlineInput
           placeholder="Senha"
-          value={formData.password}
-          onChangeText={text => setformData({...formData, password:text})}
+          defaultValue={formData.password}
+          onChangeText={text => setformData(current => ({...current, password:text}))}
           secureTextEntry
           autoCapitalize="none"
           autoComplete="password"

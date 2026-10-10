@@ -53,15 +53,15 @@ export default function Index() {
         <UnderlineInput
           placeholder="Nome"
           maxLength={30}
-          value={formData.name}
-          onChangeText={text => setformData({...formData, name:text})}
+          defaultValue={formData.name}
+          onChangeText={text => setformData(current => ({...current, name:text}))}
           autoComplete="name"
         />
         <UnderlineInput
           placeholder="Email"
           maxLength={30}
-          value={formData.email}
-          onChangeText={text => setformData({...formData, email:text})}
+          defaultValue={formData.email}
+          onChangeText={text => setformData(current => ({...current, email:text}))}
           keyboardType="email-address"
           autoCapitalize="none"
           autoComplete="email"
@@ -70,8 +70,8 @@ export default function Index() {
         <UnderlineInput
           placeholder="Senha"
           maxLength={30}
-          value={formData.password}
-          onChangeText={text => setformData({...formData, password:text})}
+          defaultValue={formData.password}
+          onChangeText={text => setformData(current => ({...current, password:text}))}
           secureTextEntry
           autoCapitalize="none"
           autoComplete="new-password"
@@ -79,8 +79,8 @@ export default function Index() {
         />
         <UnderlineInput
           placeholder="Valor por hora trabalhada"
-          value={formData.value_hour}
-          onChangeText={text => setformData({...formData, value_hour:text})}
+          defaultValue={formData.value_hour}
+          onChangeText={text => setformData(current => ({...current, value_hour:text}))}
           keyboardType="number-pad"
           maxLength={3}
           style={styles.inputSpacing}

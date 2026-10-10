@@ -1,10 +1,18 @@
 import Colors from '@/constants/colors'
 import Fonts from '@/constants/fonts'
 import React from 'react'
-import { StyleSheet } from 'react-native'
+import { TextInput as NativeTextInput, StyleSheet } from 'react-native'
 import { TextInput, TextInputProps } from 'react-native-paper'
 
 type UnderlineInputProps = Omit<TextInputProps, 'mode' | 'label'>
+
+/**
+ * Sem `value`, o campo nativo não recebe o texto de volta a cada tecla: no Android,
+ * esse vai-e-volta pode sobrescrever o que acabou de ser digitado (a última letra some).
+ */
+function renderUncontrolled({ value, ...inputProps }: React.ComponentProps<typeof NativeTextInput>) {
+    return <NativeTextInput {...inputProps} />
+}
 
 const UnderlineInput: React.FC<UnderlineInputProps> = ({ style, contentStyle, ...props }) => {
     return (
@@ -19,6 +27,7 @@ const UnderlineInput: React.FC<UnderlineInputProps> = ({ style, contentStyle, ..
             underlineStyle={styles.underline}
             style={[styles.input, style]}
             contentStyle={[styles.content, contentStyle]}
+            render={props.value === undefined ? renderUncontrolled : undefined}
             {...props}
         />
     )
