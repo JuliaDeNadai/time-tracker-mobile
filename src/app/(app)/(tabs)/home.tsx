@@ -3,6 +3,7 @@ import { showAlert } from '@/components/app-alert';
 import WeeklyChart from '@/components/weekly-chart';
 import Colors from '@/constants/colors';
 import Fonts from '@/constants/fonts';
+import { useAuth } from '@/context/auth-context.context';
 import { getErrorMessage } from '@/infra/api/api';
 import { User } from '@/infra/models';
 import { TimeEntriesRepository } from '@/infra/repositories/time-entries.repository';
@@ -19,16 +20,17 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 const usersRepository = new UsersRepository();
 const timeEntriesRepository = new TimeEntriesRepository();
 
-const SHORTCUTS: { label: string, image: number, background: string, color: string, href?: Href }[] = [
+const SHORTCUTS: { label: string, image: number, background: string, color: string, href: Href, adminOnly?: boolean }[] = [
   { label: 'Serviços', image: require('../../../../assets/images/strawberry.svg'), background: Colors.shortcut_services_bg, color: Colors.shortcut_services_text, href: '/services' },
   { label: 'Empresas', image: require('../../../../assets/images/broccoli.svg'), background: Colors.shortcut_companies_bg, color: Colors.shortcut_companies_text, href: '/companies' },
-  { label: 'Funcionários', image: require('../../../../assets/images/pizza.svg'), background: Colors.shortcut_employees_bg, color: Colors.shortcut_employees_text },
+  { label: 'Funcionários', image: require('../../../../assets/images/pizza.svg'), background: Colors.shortcut_employees_bg, color: Colors.shortcut_employees_text, href: '/employees', adminOnly: true },
 ];
 
 const EMPTY_WEEK = Array(7).fill(0);
 
 export default function Home() {
   const router = useRouter();
+  const { isAdmin } = useAuth();
   const [user, setUser] = useState<User | null>(null);
   const [week, setWeek] = useState({ current: EMPTY_WEEK, previous: EMPTY_WEEK });
   const [activeEntry, setActiveEntry] = useState<ActiveEntry | null>(null);
@@ -89,12 +91,12 @@ export default function Home() {
 
         <Text style={styles.sectionTitle}>Personalize seus serviços</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.shortcuts}>
-          {SHORTCUTS.map(shortcut => (
+          {SHORTCUTS.filter(shortcut => !shortcut.adminOnly || isAdmin).map(shortcut => (
             <TouchableOpacity
               key={shortcut.label}
               style={[styles.shortcut, { backgroundColor: shortcut.background }]}
               activeOpacity={0.8}
-              onPress={() => shortcut.href ? router.push(shortcut.href) : showAlert('Em breve!')}
+              onPress={() => router.push(shortcut.href)}
             >
               <Image source={shortcut.image} style={styles.shortcutImage} contentFit="contain" />
               <Text style={[styles.shortcutText, { color: shortcut.color }]}>{shortcut.label}</Text>
