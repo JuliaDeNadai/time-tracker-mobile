@@ -7,6 +7,12 @@ export class UsersRepository {
         return data[0]
     }
 
+    /** Somente admin. */
+    public async listGeneral(): Promise<User[]> {
+        const { data } = await api.get<User[]>('/users/general')
+        return data
+    }
+
     public async create(params: CreateUserParameters): Promise<void> {
         await api.post('/users', params)
     }

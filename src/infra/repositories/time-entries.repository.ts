@@ -1,11 +1,12 @@
 import { api } from "../api/api"
 import { StartTimeEntryParameters, TimeEntry, TimeEntryFilters } from "../models"
 
-export function toQueryParams({ year, month, companyId }: TimeEntryFilters) {
+export function toQueryParams({ year, month, companyId, userId }: TimeEntryFilters) {
     return {
         year: String(year),
         month: String(month),
-        ...(companyId ? { companyId } : {})
+        ...(companyId ? { companyId } : {}),
+        ...(userId ? { userId } : {})
     }
 }
 

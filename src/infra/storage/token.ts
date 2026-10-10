@@ -1,7 +1,23 @@
 import * as SecureStore from 'expo-secure-store';
 import { Platform } from 'react-native';
+import { UserRole } from '../models';
 
 const TOKEN_KEY = 'auth_token';
+
+interface TokenPayload {
+  userId: string;
+  email: string;
+  role?: UserRole;
+}
+
+export function decodeToken(token: string): TokenPayload | null {
+  try {
+    const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+    return JSON.parse(atob(base64.padEnd(Math.ceil(base64.length / 4) * 4, '=')));
+  } catch {
+    return null;
+  }
+}
 
 export const TokenStorage = {
   async saveToken(token: string): Promise<void> {

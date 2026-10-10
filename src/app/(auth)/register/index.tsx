@@ -1,5 +1,6 @@
 import Colors from '@/constants/colors';
 import Fonts from '@/constants/fonts';
+import { showAlert } from '@/components/app-alert';
 import AuthScreen from '@/components/auth-screen';
 import Buttons from '@/components/button';
 import UnderlineInput from '@/components/underline-input';
@@ -26,7 +27,7 @@ export default function Index() {
   async function handleRegister() {
 
     if(!formData.email || !formData.password || !formData.name || !formData.value_hour){
-      alert('Por favor, preencha todos os campos.');
+      showAlert('Por favor, preencha todos os campos.');
       return;
     }
 
@@ -38,7 +39,7 @@ export default function Index() {
       await signin({ email, password: formData.password })
     }
     catch(error){
-      alert(getErrorMessage(error, 'Erro ao criar conta. Tente novamente.'));
+      showAlert(getErrorMessage(error, 'Erro ao criar conta. Tente novamente.'));
       setLoading(false);
     }
   }

@@ -1,4 +1,5 @@
 import ActionCard from '@/components/action-card';
+import { showAlert } from '@/components/app-alert';
 import WeeklyChart from '@/components/weekly-chart';
 import Colors from '@/constants/colors';
 import Fonts from '@/constants/fonts';
@@ -44,7 +45,7 @@ export default function Home() {
         setUser(me);
         setWeek(weeklyHours(months.flat(), now));
       } catch (error) {
-        alert(getErrorMessage(error, 'Não foi possível carregar seus dados.'));
+        showAlert(getErrorMessage(error, 'Não foi possível carregar seus dados.'));
       }
     };
     load();
@@ -93,7 +94,7 @@ export default function Home() {
               key={shortcut.label}
               style={[styles.shortcut, { backgroundColor: shortcut.background }]}
               activeOpacity={0.8}
-              onPress={() => shortcut.href ? router.push(shortcut.href) : alert('Em breve!')}
+              onPress={() => shortcut.href ? router.push(shortcut.href) : showAlert('Em breve!')}
             >
               <Image source={shortcut.image} style={styles.shortcutImage} contentFit="contain" />
               <Text style={[styles.shortcutText, { color: shortcut.color }]}>{shortcut.label}</Text>

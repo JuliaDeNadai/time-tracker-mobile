@@ -1,3 +1,4 @@
+import { AlertHost } from '@/components/app-alert';
 import Colors from '@/constants/colors';
 import { FontAssets } from '@/constants/fonts';
 import { useFonts } from 'expo-font';
@@ -36,6 +37,7 @@ export default function RootLayout() {
       <AuthProvider>
         <AuthGate />
       </AuthProvider>
+      <AlertHost />
     </SafeAreaProvider>
   );
 }

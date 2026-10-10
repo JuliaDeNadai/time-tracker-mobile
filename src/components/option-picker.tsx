@@ -1,3 +1,4 @@
+import { showAlert } from '@/components/app-alert'
 import Colors from '@/constants/colors'
 import Fonts from '@/constants/fonts'
 import { getErrorMessage } from '@/infra/api/api'
@@ -35,7 +36,7 @@ const OptionPicker: React.FC<OptionPickerProps> = ({ options, loading, selectedI
             setSearch('')
             onSelect(created)
         } catch (error) {
-            alert(getErrorMessage(error))
+            showAlert(getErrorMessage(error))
         } finally {
             setCreating(false)
         }

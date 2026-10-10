@@ -1,5 +1,6 @@
 import Colors from '@/constants/colors';
 import Fonts from '@/constants/fonts';
+import { showAlert } from '@/components/app-alert';
 import AuthScreen from '@/components/auth-screen';
 import Buttons from '@/components/button';
 import UnderlineInput from '@/components/underline-input';
@@ -22,7 +23,7 @@ export default function Index() {
   async function handleLogin() {
 
     if(!formData.email || !formData.password){
-      alert('Por favor, preencha todos os campos.');
+      showAlert('Por favor, preencha todos os campos.');
       return;
     }
 
@@ -32,7 +33,7 @@ export default function Index() {
     }
     catch(error){
       const invalid = isAxiosError(error) && error.response?.status === 401
-      alert(invalid ? 'Email ou senha incorretos.' : getErrorMessage(error, 'Erro ao fazer login. Tente novamente.'));
+      showAlert(invalid ? 'Email ou senha incorretos.' : getErrorMessage(error, 'Erro ao fazer login. Tente novamente.'));
       setLoading(false);
     }
   }

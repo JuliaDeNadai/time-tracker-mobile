@@ -1,3 +1,4 @@
+import { showAlert } from '@/components/app-alert';
 import { JourneyButton, JourneyLayout } from '@/components/journey';
 import OptionPicker from '@/components/option-picker';
 import { getErrorMessage } from '@/infra/api/api';
@@ -18,7 +19,7 @@ export default function SelectCompany() {
   useEffect(() => {
     companiesRepository.list()
       .then(setCompanies)
-      .catch(error => alert(getErrorMessage(error)))
+      .catch(error => showAlert(getErrorMessage(error)))
       .finally(() => setLoading(false));
   }, []);
 

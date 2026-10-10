@@ -1,5 +1,7 @@
+import { showAlert } from '@/components/app-alert';
 import { JourneyButton, JourneyLayout } from '@/components/journey';
 import Colors from '@/constants/colors';
+import { useAuth } from '@/context/auth-context.context';
 import Fonts from '@/constants/fonts';
 import { getErrorMessage } from '@/infra/api/api';
 import { Journey, journeySummary } from '@/infra/journey';
@@ -12,6 +14,7 @@ import { ActivityIndicator, BackHandler, StyleSheet, Text, View } from 'react-na
 
 export default function Tracking() {
   const router = useRouter();
+  const { isAdmin } = useAuth();
   /** `action=stop` chega pelo "Encerrar" da notificação, bolha flutuante ou Live Activity. */
   const { action } = useLocalSearchParams<{ action?: string }>();
   const stopRequested = useRef(false);
@@ -23,13 +26,13 @@ export default function Tracking() {
     setStopping(true);
     try {
       const finished = await Journey.stop(active.id);
-      alert(journeySummary(finished));
+      showAlert(journeySummary(finished, isAdmin), 'Jornada encerrada!');
       router.dismissTo('/home');
     } catch (error) {
-      alert(getErrorMessage(error, 'Não foi possível encerrar a jornada.'));
+      showAlert(getErrorMessage(error, 'Não foi possível encerrar a jornada.'));
       setStopping(false);
     }
-  }, [router]);
+  }, [router, isAdmin]);
 
   useEffect(() => {
     ActiveEntryStorage.get().then(active => {

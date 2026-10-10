@@ -1,5 +1,6 @@
 import Colors from '@/constants/colors'
 import Fonts from '@/constants/fonts'
+import { showAlert, showConfirm } from '@/components/app-alert'
 import Buttons from '@/components/button'
 import UnderlineInput from '@/components/underline-input'
 import { getErrorMessage } from '@/infra/api/api'
@@ -7,7 +8,7 @@ import { NamedResource } from '@/infra/models'
 import { Ionicons } from '@expo/vector-icons'
 import { useFocusEffect, useRouter } from 'expo-router'
 import React, { useCallback, useState } from 'react'
-import { ActivityIndicator, Alert, FlatList, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { ActivityIndicator, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 interface ResourceListScreenProps {
@@ -21,14 +22,6 @@ interface ResourceListScreenProps {
     remove?: (id: string) => Promise<void>
 }
 
-function confirm(message: string): Promise<boolean> {
-    if (Platform.OS === 'web') return Promise.resolve(window.confirm(message))
-    return new Promise(resolve => Alert.alert('Confirmar', message, [
-        { text: 'Cancelar', style: 'cancel', onPress: () => resolve(false) },
-        { text: 'Excluir', style: 'destructive', onPress: () => resolve(true) }
-    ]))
-}
-
 const ResourceListScreen: React.FC<ResourceListScreenProps> = ({ title, subtitle, placeholder, emptyText, background, load, create, remove }) => {
     const router = useRouter()
     const [items, setItems] = useState<NamedResource[]>([])
@@ -40,7 +33,7 @@ const ResourceListScreen: React.FC<ResourceListScreenProps> = ({ title, subtitle
         try {
             setItems(await load())
         } catch (error) {
-            alert(getErrorMessage(error))
+            showAlert(getErrorMessage(error))
         } finally {
             setLoading(false)
         }
@@ -56,19 +49,26 @@ const ResourceListScreen: React.FC<ResourceListScreenProps> = ({ title, subtitle
             setName('')
             await refresh()
         } catch (error) {
-            alert(getErrorMessage(error))
+            showAlert(getErrorMessage(error))
         } finally {
             setSaving(false)
         }
     }
 
     async function handleRemove(item: NamedResource) {
-        if (!remove || !(await confirm(`Excluir “${item.name}”?`))) return
+        if (!remove) return
+        const confirmed = await showConfirm({
+            title: 'Confirmar',
+            message: `Excluir “${item.name}”?`,
+            confirmText: 'Excluir',
+            destructive: true
+        })
+        if (!confirmed) return
         try {
             await remove(item._id)
             setItems(current => current.filter(i => i._id !== item._id))
         } catch (error) {
-            alert(getErrorMessage(error))
+            showAlert(getErrorMessage(error))
         }
     }
 

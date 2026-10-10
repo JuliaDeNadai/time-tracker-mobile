@@ -1,3 +1,4 @@
+import { showAlert } from '@/components/app-alert';
 import { JourneyButton, JourneyLayout, journeyText } from '@/components/journey';
 import { getErrorMessage } from '@/infra/api/api';
 import { Journey } from '@/infra/journey';
@@ -20,7 +21,7 @@ export default function ConfirmEntry() {
       router.replace('/tracking');
       JourneyNotification.offerOverlayOnce();
     } catch (error) {
-      alert(getErrorMessage(error, 'Não foi possível iniciar a jornada.'));
+      showAlert(getErrorMessage(error, 'Não foi possível iniciar a jornada.'));
       setStarting(false);
     }
   }

@@ -6,8 +6,9 @@ import { ActiveEntry, ActiveEntryStorage } from './storage/active-entry';
 
 const timeEntriesRepository = new TimeEntriesRepository();
 
-export function journeySummary(finished: TimeEntry): string {
-  return `Jornada encerrada!\nTotal: ${finished.total_hours ?? '00:00'} horas\nValor: ${formatCurrency(finished.total_amount)}`;
+export function journeySummary(finished: TimeEntry, showValues: boolean): string {
+  const summary = `Total: ${finished.total_hours ?? '00:00'} horas`;
+  return showValues ? `${summary}\nValor: ${formatCurrency(finished.total_amount ?? null)}` : summary;
 }
 
 /** Inicia/encerra a jornada mantendo API, armazenamento local e notificação em sincronia. */

@@ -1,3 +1,4 @@
+import { showAlert } from '@/components/app-alert';
 import { JourneyButton, JourneyLayout } from '@/components/journey';
 import OptionPicker from '@/components/option-picker';
 import { getErrorMessage } from '@/infra/api/api';
@@ -17,7 +18,7 @@ export default function SelectService() {
   useEffect(() => {
     servicesRepository.list()
       .then(setServices)
-      .catch(error => alert(getErrorMessage(error)))
+      .catch(error => showAlert(getErrorMessage(error)))
       .finally(() => setLoading(false));
   }, []);
 

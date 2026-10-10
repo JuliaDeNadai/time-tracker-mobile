@@ -1,20 +1,25 @@
 import { setUnauthorizedHandler } from '@/infra/api/api';
 import { JourneyNotification } from '@/infra/notifications/journey-notification';
+import { UserRole } from '@/infra/models';
 import { AuthRepository } from '@/infra/repositories/auth.respository';
+import { UsersRepository } from '@/infra/repositories/users.repository';
 import { ActiveEntryStorage } from '@/infra/storage/active-entry';
-import { TokenStorage } from '@/infra/storage/token';
+import { decodeToken, TokenStorage } from '@/infra/storage/token';
 import React, {
   createContext,
   ReactNode,
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useState,
 } from 'react';
 
 interface AuthContextData {
   token: string | null;
   loading: boolean;
+  /** Valores monetários só devem ser exibidos para admin */
+  isAdmin: boolean;
   signin: (data: { email: string; password: string }) => Promise<void>;
   signout: () => Promise<void>;
 }
@@ -22,6 +27,7 @@ interface AuthContextData {
 const AuthContext = createContext<AuthContextData | undefined>(undefined);
 
 const repository = new AuthRepository();
+const usersRepository = new UsersRepository();
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
@@ -54,11 +60,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setToken(accessToken);
   };
 
+  const tokenRole = useMemo(() => (token ? decodeToken(token)?.role ?? null : null), [token]);
+  const [serverRole, setServerRole] = useState<{ token: string, role: UserRole } | null>(null);
+
+  // O token dura 30 dias e pode carregar um perfil desatualizado; o perfil do servidor prevalece.
+  useEffect(() => {
+    if (!token) return;
+    usersRepository.me()
+      .then(user => setServerRole({ token, role: user.role }))
+      .catch(() => {});
+  }, [token]);
+
+  const role = serverRole?.token === token ? serverRole.role : tokenRole;
+  const isAdmin = role === 'admin';
+
   return (
     <AuthContext.Provider
       value={{
         token,
         loading,
+        isAdmin,
         signin,
         signout,
       }}

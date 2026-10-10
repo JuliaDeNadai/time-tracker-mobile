@@ -2,7 +2,8 @@ import { ActiveEntry } from '@/infra/storage/active-entry';
 import { formatTime } from '@/utils/time';
 import * as Linking from 'expo-linking';
 import * as SecureStore from 'expo-secure-store';
-import { Alert, Platform } from 'react-native';
+import { showConfirm } from '@/components/app-alert';
+import { Platform } from 'react-native';
 import { JourneyActivity } from '../../../modules/journey-activity';
 import { Notifications } from './notifications-module';
 
@@ -93,15 +94,14 @@ export const JourneyNotification = {
     if (await SecureStore.getItemAsync(OVERLAY_PROMPTED_KEY)) return;
     await SecureStore.setItemAsync(OVERLAY_PROMPTED_KEY, '1');
 
-    Alert.alert(
-      'Contador flutuante',
-      'Quer ver o tempo da jornada flutuando sobre outros apps? Você pode encerrar a jornada por ali. ' +
-      'Na próxima tela, ative "Permitir sobreposição a outros apps".',
-      [
-        { text: 'Agora não', style: 'cancel' },
-        { text: 'Ativar', onPress: () => JourneyNotification.setOverlayEnabled(true) },
-      ],
-    );
+    const confirmed = await showConfirm({
+      title: 'Contador flutuante',
+      message: 'Quer ver o tempo da jornada flutuando sobre outros apps? Você pode encerrar a jornada por ali. ' +
+        'Na próxima tela, ative "Permitir sobreposição a outros apps".',
+      cancelText: 'Agora não',
+      confirmText: 'Ativar',
+    });
+    if (confirmed) JourneyNotification.setOverlayEnabled(true);
   },
 };
 

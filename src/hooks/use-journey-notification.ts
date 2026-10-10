@@ -1,3 +1,5 @@
+import { showAlert } from '@/components/app-alert';
+import { useAuth } from '@/context/auth-context.context';
 import { getErrorMessage } from '@/infra/api/api';
 import { Journey, journeySummary } from '@/infra/journey';
 import {
@@ -13,6 +15,7 @@ import { useEffect } from 'react';
 
 export function useJourneyNotification(enabled: boolean) {
   const router = useRouter();
+  const { isAdmin } = useAuth();
 
   useEffect(() => {
     if (!enabled) return;
@@ -36,10 +39,10 @@ export function useJourneyNotification(enabled: boolean) {
         if (!entryId) return;
         Journey.stop(entryId)
           .then(finished => {
-            alert(journeySummary(finished));
+            showAlert(journeySummary(finished, isAdmin), 'Jornada encerrada!');
             router.dismissTo('/home');
           })
-          .catch(error => alert(getErrorMessage(error, 'Não foi possível encerrar a jornada.')));
+          .catch(error => showAlert(getErrorMessage(error, 'Não foi possível encerrar a jornada.')));
       } else if (response.actionIdentifier === notifications.DEFAULT_ACTION_IDENTIFIER) {
         router.push('/tracking');
       }
@@ -49,5 +52,5 @@ export function useJourneyNotification(enabled: boolean) {
     if (last) handle(last);
     const subscription = notifications.addNotificationResponseReceivedListener(handle);
     return () => subscription.remove();
-  }, [enabled, router]);
+  }, [enabled, router, isAdmin]);
 }

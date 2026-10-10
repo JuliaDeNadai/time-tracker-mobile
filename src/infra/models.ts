@@ -1,8 +1,12 @@
+export type UserRole = 'admin' | 'general';
+
 export interface User {
   _id: string;
   name: string;
   email: string;
-  value_hour: number;
+  role: UserRole;
+  /** Só retornado pela API para admin */
+  value_hour?: number;
 }
 
 export interface CreateUserParameters {
@@ -32,8 +36,8 @@ export interface TimeEntry {
   clock_out: string | null;
   /** "HH:MM" */
   total_hours: string | null;
-  /** número serializado como string */
-  total_amount: string | null;
+  /** número serializado como string; só retornado pela API para admin */
+  total_amount?: string | null;
   details: string | null;
   active: boolean;
 }
@@ -42,6 +46,8 @@ export interface TimeEntryFilters {
   year: number;
   month: number;
   companyId?: string;
+  /** Só aceito pela API para admin (usuários general); padrão: o próprio usuário */
+  userId?: string;
 }
 
 export interface StartTimeEntryParameters {

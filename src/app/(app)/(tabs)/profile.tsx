@@ -1,3 +1,4 @@
+import { showAlert } from '@/components/app-alert';
 import Colors from '@/constants/colors';
 import Fonts from '@/constants/fonts';
 import { getErrorMessage } from '@/infra/api/api';
@@ -15,7 +16,7 @@ import { useAuth } from '../../../context/auth-context.context';
 const usersRepository = new UsersRepository();
 
 export default function Profile() {
-  const { signout } = useAuth();
+  const { signout, isAdmin } = useAuth();
   const [user, setUser] = useState<User | null>(null);
   const [overlayOn, setOverlayOn] = useState(false);
   const overlayAvailable = JourneyNotification.overlaySupported();
@@ -23,7 +24,7 @@ export default function Profile() {
   useFocusEffect(useCallback(() => {
     usersRepository.me()
       .then(setUser)
-      .catch(error => alert(getErrorMessage(error, 'Não foi possível carregar o perfil.')));
+      .catch(error => showAlert(getErrorMessage(error, 'Não foi possível carregar o perfil.')));
   }, []));
 
   useFocusEffect(useCallback(() => {
@@ -55,10 +56,12 @@ export default function Profile() {
           <Text style={styles.name}>{user.name}</Text>
           <Text style={styles.email}>{user.email}</Text>
 
-          <View style={styles.card}>
-            <Text style={styles.cardLabel}>Valor por hora</Text>
-            <Text style={styles.cardValue}>{formatCurrency(user.value_hour)}</Text>
-          </View>
+          {isAdmin && (
+            <View style={styles.card}>
+              <Text style={styles.cardLabel}>Valor por hora</Text>
+              <Text style={styles.cardValue}>{formatCurrency(user.value_hour ?? null)}</Text>
+            </View>
+          )}
 
           {Platform.OS === 'android' && (
             <View style={[styles.card, styles.overlayCard, !overlayAvailable && styles.disabled]}>

@@ -1,10 +1,12 @@
 import ActionCard from '@/components/action-card';
+import { showAlert } from '@/components/app-alert';
 import RecordCard from '@/components/record-card';
 import UnderlineInput from '@/components/underline-input';
 import Colors from '@/constants/colors';
 import Fonts from '@/constants/fonts';
 import { getErrorMessage } from '@/infra/api/api';
-import { Company, TimeEntry, TimeEntryFilters, User } from '@/infra/models';
+import { useAuth } from '@/context/auth-context.context';
+import { Company, NamedResource, TimeEntry, TimeEntryFilters, User } from '@/infra/models';
 import { CompaniesRepository } from '@/infra/repositories/companies.repository';
 import { ReportsRepository } from '@/infra/repositories/reports.repository';
 import { TimeEntriesRepository } from '@/infra/repositories/time-entries.repository';
@@ -30,7 +32,9 @@ export default function Records() {
   const [filters, setFilters] = useState<TimeEntryFilters>(currentMonthFilters);
   const [entries, setEntries] = useState<TimeEntry[]>([]);
   const [companies, setCompanies] = useState<Company[]>([]);
+  const { isAdmin } = useAuth();
   const [user, setUser] = useState<User | null>(null);
+  const [generalUsers, setGeneralUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [searchVisible, setSearchVisible] = useState(false);
@@ -43,7 +47,7 @@ export default function Records() {
       try {
         setEntries(await timeEntriesRepository.list(filters));
       } catch (error) {
-        alert(getErrorMessage(error, 'Não foi possível carregar os registros.'));
+        showAlert(getErrorMessage(error, 'Não foi possível carregar os registros.'));
       } finally {
         setLoading(false);
       }
@@ -54,7 +58,13 @@ export default function Records() {
   useFocusEffect(useCallback(() => {
     companiesRepository.list().then(setCompanies).catch(() => {});
     usersRepository.me().then(setUser).catch(() => {});
-  }, []));
+    if (isAdmin) usersRepository.listGeneral().then(setGeneralUsers).catch(() => {});
+  }, [isAdmin]));
+
+  const users = useMemo(
+    () => (user ? [user, ...generalUsers.filter(general => general._id !== user._id)] : generalUsers),
+    [user, generalUsers]
+  );
 
   const visibleEntries = useMemo(() => {
     const term = search.trim().toLowerCase();
@@ -67,17 +77,18 @@ export default function Records() {
 
   const totalMinutes = visibleEntries.reduce((sum, entry) => sum + hoursToMinutes(entry.total_hours), 0);
   const companyName = companies.find(company => company._id === filters.companyId)?.name;
+  const selectedUserName = filters.userId ? users.find(option => option._id === filters.userId)?.name : undefined;
 
   async function handleReport() {
     if (entries.length === 0) {
-      alert('Não há registros nesse período para gerar o relatório.');
+      showAlert('Não há registros nesse período para gerar o relatório.');
       return;
     }
     setGenerating(true);
     try {
       await reportsRepository.shareMonthlyReport(filters);
     } catch (error) {
-      alert(getErrorMessage(error, 'Não foi possível gerar o relatório.'));
+      showAlert(getErrorMessage(error, 'Não foi possível gerar o relatório.'));
     } finally {
       setGenerating(false);
     }
@@ -112,7 +123,9 @@ export default function Records() {
         <Text style={styles.total}>{formatMinutes(totalMinutes)} horas</Text>
       </View>
       <Text style={styles.period}>
-        {MONTHS[filters.month - 1]} de {filters.year}{companyName ? ` · ${companyName}` : ''}
+        {MONTHS[filters.month - 1]} de {filters.year}
+        {companyName ? ` · ${companyName}` : ''}
+        {selectedUserName ? ` · ${selectedUserName}` : ''}
       </Text>
 
       {loading ? <ActivityIndicator style={styles.loading} color={Colors.primary} /> : (
@@ -137,6 +150,7 @@ export default function Records() {
         visible={filterVisible}
         initial={filters}
         companies={companies}
+        users={isAdmin ? users : undefined}
         providerName={user?.name}
         onClose={() => setFilterVisible(false)}
         onApply={value => { setFilters(value); setFilterVisible(false); }}
@@ -149,12 +163,14 @@ interface FilterModalProps {
   visible: boolean;
   initial: TimeEntryFilters;
   companies: Company[];
+  /** Só informado para admin; general vê apenas o próprio nome */
+  users?: User[];
   providerName?: string;
   onClose: () => void;
   onApply: (filters: TimeEntryFilters) => void;
 }
 
-function FilterModal({ visible, initial, companies, providerName, onClose, onApply }: FilterModalProps) {
+function FilterModal({ visible, initial, companies, users, providerName, onClose, onApply }: FilterModalProps) {
   const [draft, setDraft] = useState(initial);
 
   function shiftMonth(delta: number) {
@@ -174,24 +190,26 @@ function FilterModal({ visible, initial, companies, providerName, onClose, onApp
           </FilterRow>
 
           <Text style={styles.filterLabel}>Empresa</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chips}>
-            {[{ _id: '', name: 'Todas' }, ...companies].map(company => {
-              const selected = (draft.companyId ?? '') === company._id;
-              return (
-                <TouchableOpacity
-                  key={company._id || 'all'}
-                  style={[styles.chip, selected && styles.chipSelected]}
-                  onPress={() => setDraft({ ...draft, companyId: company._id || undefined })}
-                >
-                  <Text style={[styles.chipText, selected && styles.chipTextSelected]}>{company.name}</Text>
-                </TouchableOpacity>
-              );
-            })}
-          </ScrollView>
+          <Chips
+            options={[{ _id: '', name: 'Todas' }, ...companies]}
+            selectedId={draft.companyId ?? ''}
+            onSelect={id => setDraft({ ...draft, companyId: id || undefined })}
+          />
 
-          <FilterRow label="Prestador de serviço">
-            <Text style={styles.filterValue}>{providerName ?? '-'}</Text>
-          </FilterRow>
+          {users ? (
+            <>
+              <Text style={styles.filterLabel}>Prestador de serviço</Text>
+              <Chips
+                options={users}
+                selectedId={draft.userId ?? users[0]?._id}
+                onSelect={id => setDraft({ ...draft, userId: id === users[0]?._id ? undefined : id })}
+              />
+            </>
+          ) : (
+            <FilterRow label="Prestador de serviço">
+              <Text style={styles.filterValue}>{providerName ?? '-'}</Text>
+            </FilterRow>
+          )}
 
           <ActionCard
             text="Aplicar filtro"
@@ -202,6 +220,25 @@ function FilterModal({ visible, initial, companies, providerName, onClose, onApp
         </Pressable>
       </Pressable>
     </Modal>
+  );
+}
+
+function Chips({ options, selectedId, onSelect }: { options: NamedResource[], selectedId?: string, onSelect: (id: string) => void }) {
+  return (
+    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chips}>
+      {options.map(option => {
+        const selected = selectedId === option._id;
+        return (
+          <TouchableOpacity
+            key={option._id || 'all'}
+            style={[styles.chip, selected && styles.chipSelected]}
+            onPress={() => onSelect(option._id)}
+          >
+            <Text style={[styles.chipText, selected && styles.chipTextSelected]}>{option.name}</Text>
+          </TouchableOpacity>
+        );
+      })}
+    </ScrollView>
   );
 }
 
