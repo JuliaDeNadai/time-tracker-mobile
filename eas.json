@@ -5,16 +5,19 @@
   },
   "build": {
     "development": {
+      "node": "26.7.0",
       "developmentClient": true,
       "distribution": "internal"
     },
     "preview": {
+      "node": "26.7.0",
       "distribution": "internal",
       "env": {
         "EXPO_PUBLIC_API_URL": "https://lpjjvijj5uw4lmpp3rzbzg2t2a0kehfw.lambda-url.sa-east-1.on.aws"
       }
     },
     "production": {
+      "node": "26.7.0",
       "autoIncrement": true,
       "env": {
         "EXPO_PUBLIC_API_URL": "https://lpjjvijj5uw4lmpp3rzbzg2t2a0kehfw.lambda-url.sa-east-1.on.aws"
