@@ -5,15 +5,14 @@ export interface User {
   name: string;
   email: string;
   role: UserRole;
-  /** Só retornado pela API para admin */
-  value_hour?: number;
+  /** Só retornado pela API para admin; null quando ainda não foi cadastrado */
+  value_hour?: number | null;
 }
 
 export interface CreateUserParameters {
   name: string;
   email: string;
   password: string;
-  value_hour: string;
 }
 
 export interface NamedResource {

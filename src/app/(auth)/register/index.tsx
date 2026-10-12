@@ -19,14 +19,13 @@ export default function Index() {
   const [formData, setformData] = useState({
       email:'',
       password:'',
-      name:'',
-      value_hour:''
+      name:''
   })
   const [loading, setLoading] = useState(false);
 
   async function handleRegister() {
 
-    if(!formData.email || !formData.password || !formData.name || !formData.value_hour){
+    if(!formData.email || !formData.password || !formData.name){
       showAlert('Por favor, preencha todos os campos.');
       return;
     }
@@ -75,14 +74,6 @@ export default function Index() {
           secureTextEntry
           autoCapitalize="none"
           autoComplete="new-password"
-          style={styles.inputSpacing}
-        />
-        <UnderlineInput
-          placeholder="Valor por hora trabalhada"
-          defaultValue={formData.value_hour}
-          onChangeText={text => setformData(current => ({...current, value_hour:text}))}
-          keyboardType="number-pad"
-          maxLength={3}
           style={styles.inputSpacing}
         />
       </View>
