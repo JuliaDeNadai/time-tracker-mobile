@@ -14,7 +14,8 @@ interface OptionPickerProps {
     selectedId?: string,
     placeholder: string,
     emptyText: string,
-    onSelect: (option: NamedResource) => void,
+    /** Recebe `null` quando o item já selecionado é tocado de novo. */
+    onSelect: (option: NamedResource | null) => void,
     onCreate: (name: string) => Promise<NamedResource>
 }
 
@@ -50,6 +51,7 @@ const OptionPicker: React.FC<OptionPickerProps> = ({ options, loading, selectedI
                 <FlatList
                     data={filtered}
                     keyExtractor={item => item._id}
+                    extraData={selectedId}
                     style={styles.list}
                     keyboardShouldPersistTaps="handled"
                     ListHeaderComponent={canCreate ? (
@@ -64,7 +66,7 @@ const OptionPicker: React.FC<OptionPickerProps> = ({ options, loading, selectedI
                     renderItem={({ item }) => {
                         const selected = item._id === selectedId
                         return (
-                            <TouchableOpacity style={styles.option} onPress={() => onSelect(item)}>
+                            <TouchableOpacity style={styles.option} onPress={() => onSelect(selected ? null : item)}>
                                 <Text style={[styles.optionText, selected && styles.selectedText]}>{item.name}</Text>
                                 {selected && <Ionicons name="checkmark" size={20} color={Colors.green_dark} />}
                             </TouchableOpacity>

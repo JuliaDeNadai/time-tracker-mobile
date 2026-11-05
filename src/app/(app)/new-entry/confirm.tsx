@@ -1,23 +1,29 @@
 import { showAlert } from '@/components/app-alert';
 import { JourneyButton, JourneyLayout, journeyText } from '@/components/journey';
+import UnderlineInput from '@/components/underline-input';
 import { getErrorMessage } from '@/infra/api/api';
 import { Journey } from '@/infra/journey';
 import { JourneyNotification } from '@/infra/notifications/journey-notification';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Keyboard, StyleSheet, Text, View } from 'react-native';
 
 export default function ConfirmEntry() {
   const router = useRouter();
   const { serviceId, serviceName, companyId, companyName } = useLocalSearchParams<{
     serviceId: string, serviceName: string, companyId: string, companyName: string
   }>();
+  const [details, setDetails] = useState('');
   const [starting, setStarting] = useState(false);
 
   async function handleStart() {
+    Keyboard.dismiss();
     setStarting(true);
     try {
-      await Journey.start({ service: serviceId, company: companyId }, { serviceName, companyName });
+      await Journey.start(
+        { service: serviceId, company: companyId, details: details.trim() || undefined },
+        { serviceName, companyName },
+      );
       router.replace('/tracking');
       JourneyNotification.offerOverlayOnce();
     } catch (error) {
@@ -30,6 +36,7 @@ export default function ConfirmEntry() {
     <JourneyLayout
       step={3}
       centered
+      keyboardAware
       footer={<JourneyButton variant="back" text="Voltar" onPress={() => router.back()} />}
     >
       <View style={styles.content}>
@@ -38,6 +45,15 @@ export default function ConfirmEntry() {
 
         <Text style={[journeyText.label, styles.spacing]}>Empresa contratante:</Text>
         <Text style={journeyText.value}>{companyName}</Text>
+
+        <UnderlineInput
+          placeholder="Descrição (opcional) — ex.: Máquina 1"
+          onChangeText={setDetails}
+          maxLength={100}
+          returnKeyType="done"
+          editable={!starting}
+          style={styles.details}
+        />
 
         <JourneyButton
           variant="start"
@@ -58,6 +74,10 @@ const styles = StyleSheet.create({
   },
   spacing: {
     marginTop: 28,
+  },
+  details: {
+    marginTop: 28,
+    alignSelf: 'stretch',
   },
   start: {
     marginTop: 52,

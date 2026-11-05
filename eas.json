@@ -13,14 +13,14 @@
       "node": "26.7.0",
       "distribution": "internal",
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://lpjjvijj5uw4lmpp3rzbzg2t2a0kehfw.lambda-url.sa-east-1.on.aws"
+        "EXPO_PUBLIC_API_URL": "https://d8gc65spyzga1.cloudfront.net"
       }
     },
     "production": {
       "node": "26.7.0",
       "autoIncrement": true,
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://lpjjvijj5uw4lmpp3rzbzg2t2a0kehfw.lambda-url.sa-east-1.on.aws"
+        "EXPO_PUBLIC_API_URL": "https://d8gc65spyzga1.cloudfront.net"
       }
     }
   }

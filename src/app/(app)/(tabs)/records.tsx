@@ -84,6 +84,13 @@ export default function Records() {
       showAlert('Não há registros nesse período para gerar o relatório.');
       return;
     }
+    if (isAdmin) {
+      const target = filters.userId ? users.find(option => option._id === filters.userId) : user;
+      if (target?.value_hour == null) {
+        showAlert(`${target?.name ?? 'O usuário'} não tem valor/hora cadastrado. Cadastre o valor na tela de funcionários antes de gerar o relatório.`);
+        return;
+      }
+    }
     setGenerating(true);
     try {
       await reportsRepository.shareMonthlyReport(filters);

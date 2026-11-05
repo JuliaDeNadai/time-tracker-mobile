@@ -30,7 +30,7 @@ export class ReportsRepository {
         const file = await File.downloadFileAsync(
             `${api.defaults.baseURL}/reports/time-entries?${query}`,
             new File(Paths.cache, fileName),
-            { headers: token ? { Authorization: `Bearer ${token}` } : {}, idempotent: true }
+            { headers: token ? { 'x-access-token': token } : {}, idempotent: true }
         )
 
         await Sharing.shareAsync(file.uri, {

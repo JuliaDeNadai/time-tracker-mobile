@@ -1,8 +1,8 @@
 import Colors from '@/constants/colors'
 import Fonts from '@/constants/fonts'
 import { Ionicons } from '@expo/vector-icons'
-import React, { ReactNode } from 'react'
-import { ActivityIndicator, StyleProp, StyleSheet, Text, TouchableOpacity, View, ViewStyle } from 'react-native'
+import React, { ReactNode, useEffect, useRef, useState } from 'react'
+import { ActivityIndicator, Keyboard, KeyboardAvoidingView, Platform, ScrollView, StyleProp, StyleSheet, Text, TouchableOpacity, View, ViewStyle } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 export const Stepper: React.FC<{ step: 1 | 2 | 3 }> = ({ step }) => (
@@ -61,20 +61,77 @@ interface JourneyLayoutProps {
     subtitle?: string,
     children?: ReactNode,
     footer?: ReactNode,
-    centered?: boolean
+    centered?: boolean,
+    /** Corpo rolável que encolhe com o teclado; use em telas com campo de texto fora de lista. */
+    keyboardAware?: boolean
 }
 
-export const JourneyLayout: React.FC<JourneyLayoutProps> = ({ step, subtitle, children, footer, centered }) => (
-    <SafeAreaView style={styles.container}>
-        {step && <Stepper step={step} />}
-        <View style={[styles.body, centered && styles.centered]}>
+export const JourneyLayout: React.FC<JourneyLayoutProps> = ({ step, subtitle, children, footer, centered, keyboardAware }) => {
+    const header = (
+        <>
             <Text style={styles.title}>Nova jornada</Text>
             {subtitle && <Text style={styles.subtitle}>{subtitle}</Text>}
-            {children}
-        </View>
-        {footer && <View style={styles.footer}>{footer}</View>}
-    </SafeAreaView>
-)
+        </>
+    )
+
+    if (keyboardAware) {
+        return (
+            <SafeAreaView style={styles.container}>
+                {step && <Stepper step={step} />}
+                <KeyboardAwareBody centered={centered} footer={footer}>
+                    {header}
+                    {children}
+                </KeyboardAwareBody>
+            </SafeAreaView>
+        )
+    }
+
+    return (
+        <SafeAreaView style={styles.container}>
+            {step && <Stepper step={step} />}
+            <View style={[styles.body, centered && styles.centered]}>
+                {header}
+                {children}
+            </View>
+            {footer && <View style={styles.footer}>{footer}</View>}
+        </SafeAreaView>
+    )
+}
+
+/**
+ * No Android (edge-to-edge) a janela não encolhe com o teclado, então o `padding`
+ * do KeyboardAvoidingView é necessário nas duas plataformas.
+ */
+const KeyboardAwareBody: React.FC<{ centered?: boolean, footer?: ReactNode, children: ReactNode }> = ({ centered, footer, children }) => {
+    const scrollRef = useRef<ScrollView>(null)
+    const [keyboardVisible, setKeyboardVisible] = useState(false)
+
+    useEffect(() => {
+        const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow'
+        const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide'
+        const show = Keyboard.addListener(showEvent, () => setKeyboardVisible(true))
+        const hide = Keyboard.addListener(hideEvent, () => setKeyboardVisible(false))
+        return () => {
+            show.remove()
+            hide.remove()
+        }
+    }, [])
+
+    return (
+        <KeyboardAvoidingView style={styles.keyboard} behavior="padding">
+            <ScrollView
+                ref={scrollRef}
+                contentContainerStyle={[styles.scrollBody, centered && styles.centered]}
+                keyboardShouldPersistTaps="handled"
+                keyboardDismissMode="interactive"
+                onLayout={() => keyboardVisible && scrollRef.current?.scrollToEnd({ animated: true })}
+            >
+                {children}
+            </ScrollView>
+            {footer && !keyboardVisible && <View style={styles.footer}>{footer}</View>}
+        </KeyboardAvoidingView>
+    )
+}
 
 export const journeyText = StyleSheet.create({
     label:{
@@ -127,6 +184,14 @@ const styles = StyleSheet.create({
     },
     centered:{
         justifyContent:'center'
+    },
+    keyboard:{
+        flex:1
+    },
+    scrollBody:{
+        flexGrow:1,
+        paddingHorizontal:35,
+        paddingBottom:24
     },
     title:{
         marginTop:40,
