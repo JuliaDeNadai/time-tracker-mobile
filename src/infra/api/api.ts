@@ -1,4 +1,5 @@
 import axios, { AxiosError, isAxiosError } from "axios";
+import * as Crypto from "expo-crypto";
 import { TokenStorage } from '../storage/token';
 
 export const api = axios.create({
@@ -15,7 +16,20 @@ api.interceptors.request.use(async (config) => {
   const token = await TokenStorage.getToken();
 
   if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+    // CloudFront OAC uses Authorization for SigV4; JWT goes in a custom header.
+    config.headers["x-access-token"] = token;
+    delete config.headers.Authorization;
+  }
+
+  if (config.data !== undefined && config.data !== null) {
+    const body =
+      typeof config.data === "string" ? config.data : JSON.stringify(config.data);
+    config.data = body;
+    config.headers["Content-Type"] = "application/json";
+    config.headers["x-amz-content-sha256"] = await Crypto.digestStringAsync(
+      Crypto.CryptoDigestAlgorithm.SHA256,
+      body,
+    );
   }
 
   return config;
