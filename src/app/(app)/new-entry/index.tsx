@@ -3,43 +3,43 @@ import { JourneyButton, JourneyLayout } from '@/components/journey';
 import OptionPicker from '@/components/option-picker';
 import { getErrorMessage } from '@/infra/api/api';
 import { NamedResource } from '@/infra/models';
-import { ServicesRepository } from '@/infra/repositories/services.repository';
+import { CompaniesRepository } from '@/infra/repositories/companies.repository';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 
-const servicesRepository = new ServicesRepository();
+const companiesRepository = new CompaniesRepository();
 
-export default function SelectService() {
+export default function SelectCompany() {
   const router = useRouter();
-  const [services, setServices] = useState<NamedResource[]>([]);
+  const [companies, setCompanies] = useState<NamedResource[]>([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<NamedResource | null>(null);
 
   useEffect(() => {
-    servicesRepository.list()
-      .then(setServices)
+    companiesRepository.list()
+      .then(setCompanies)
       .catch(error => showAlert(getErrorMessage(error)))
       .finally(() => setLoading(false));
   }, []);
 
   async function handleCreate(name: string) {
-    const created = await servicesRepository.create(name);
-    setServices(current => [...current, created]);
+    const created = await companiesRepository.create(name);
+    setCompanies(current => [...current, created]);
     return created;
   }
 
   function handleNext() {
     if (!selected) return;
     router.push({
-      pathname: '/new-entry/company',
-      params: { serviceId: selected._id, serviceName: selected.name },
+      pathname: '/new-entry/service',
+      params: { companyId: selected._id, companyName: selected.name },
     });
   }
 
   return (
     <JourneyLayout
       step={1}
-      subtitle="Selecione qual será o serviço prestado:"
+      subtitle="Selecione qual será a empresa contratante:"
       footer={(
         <>
           <JourneyButton variant="cancel" text="Cancelar" onPress={() => router.back()} />
@@ -48,11 +48,11 @@ export default function SelectService() {
       )}
     >
       <OptionPicker
-        options={services}
+        options={companies}
         loading={loading}
         selectedId={selected?._id}
-        placeholder="Buscar ou cadastrar serviço"
-        emptyText="Nenhum serviço cadastrado. Digite o nome para cadastrar."
+        placeholder="Buscar ou cadastrar empresa"
+        emptyText="Nenhuma empresa cadastrada. Digite o nome para cadastrar."
         onSelect={setSelected}
         onCreate={handleCreate}
       />

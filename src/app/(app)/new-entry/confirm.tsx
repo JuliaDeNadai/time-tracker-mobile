@@ -40,11 +40,11 @@ export default function ConfirmEntry() {
       footer={<JourneyButton variant="back" text="Voltar" onPress={() => router.back()} />}
     >
       <View style={styles.content}>
-        <Text style={journeyText.label}>Serviço a ser prestado:</Text>
-        <Text style={journeyText.value}>{serviceName}</Text>
-
-        <Text style={[journeyText.label, styles.spacing]}>Empresa contratante:</Text>
+        <Text style={journeyText.label}>Empresa contratante:</Text>
         <Text style={journeyText.value}>{companyName}</Text>
+
+        <Text style={[journeyText.label, styles.spacing]}>Serviço a ser prestado:</Text>
+        <Text style={journeyText.value}>{serviceName}</Text>
 
         <UnderlineInput
           placeholder="Descrição (opcional) — ex.: Máquina 1"
